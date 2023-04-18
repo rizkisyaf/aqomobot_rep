@@ -1,0 +1,85 @@
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import Update
+import logging
+
+# Set up logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Set up Telegram Bot
+TOKEN = '6160222408:AAHZsqMWBOyvYwwNeHt_vsEqSYtZYmN1Hzw'
+bot = telegram.Bot(token=TOKEN)
+
+# Define the functions for each command
+def start(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Welcome to AqomoBot! Please send me your property data.")
+
+def help(update, context):
+    help_text = """
+    You can interact with this bot using the following commands:
+    
+    /start - Start the bot
+    /help - Show this help message
+    /submitdata - Submit property data for valuation
+    """
+    context.bot.send_message(chat_id=update.effective_chat.id, text=help_text)
+
+def submitdata(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Please enter your property data in the following format:\n\n<PROPERTY TYPE>,<LOCATION>,<PROPERTY SIZE>,<NUMBER OF BEDROOMS>,<NUMBER OF BATHROOMS>,<NUMBER OF PARKING SPACES>,<PROPERTY AGE>,<PROPERTY HISTORY>,<MARKET TRENDS>,<ECONOMIC DATA>,<DEMOGRAPHIC DATA>,<ENVIRONMENTAL FACTORS>,<LEGAL AND REGULATORY DATA>,<PROPERTY MANAGEMENT DATA>")
+
+def propertyvalue(update, context):
+    # TODO: Add code to calculate the fair value of the property
+    # Extract the property data from the user input
+    property_data = update.message.text.split(',')
+    property_type = property_data[0]
+    location = property_data[1]
+    property_size = float(property_data[2])
+    num_bedrooms = int(property_data[3])
+    num_bathrooms = int(property_data[4])
+    num_parking_spaces = int(property_data[5])
+    property_age = int(property_data[6])
+    property_history = property_data[7]
+    market_trends = property_data[8]
+    economic_data = property_data[9]
+    demographic_data = property_data[10]
+    environmental_factors = property_data[11]
+    legal_regulatory_data = property_data[12]
+    property_management_data = float(property_data[13])
+    
+    # TODO: Add code to calculate the fair value of the property based on the input data
+    
+    # Send the fair value of the property to the user
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=f"The fair value of your {property_type} property in {location} is {fair_value}.")
+
+def error(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+# Set up the handlers for each command
+def main():
+    updater = Updater(token=TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
+    
+    start_handler = CommandHandler('start', start)
+    dispatcher.add_handler(start_handler)
+    
+    help_handler = CommandHandler('help', help)
+    dispatcher.add_handler(help_handler)
+    
+    submitdata_handler = CommandHandler('submitdata', submitdata)
+    dispatcher.add_handler(submitdata_handler)
+    
+    propertyvalue_handler = MessageHandler(Filters.text & ~Filters.command, propertyvalue)
+    dispatcher.add_handler(propertyvalue_handler)
+    
+    dispatcher.add_error_handler(error)
+    
+    updater.start_polling(timeout=60, poll_interval=0.5)
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
